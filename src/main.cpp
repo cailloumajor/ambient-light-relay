@@ -70,6 +70,7 @@ void setup()
     printSuccess(success);
 
     Serial.println(F("Setting up web server"));
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
     server.addHandler(&events);
     server.on("/settings", HTTP_GET, [](AsyncWebServerRequest* req) {
         AsyncResponseStream* resp = req->beginResponseStream(F("application/json"));
