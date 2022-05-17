@@ -15,6 +15,8 @@ const char SETTINGS_PATH[] = "/settings.json";
 unsigned long lastMeasurement = 0;
 float threshold = 50, hysteresis = 10;
 
+float lux = 0;
+
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
 BH1750 lightMeter;
@@ -71,6 +73,8 @@ void setup()
 
     Serial.println(F("Setting up web server"));
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
+    events.onConnect(
+        [](AsyncEventSourceClient* client) { client->send(String(lux, 0).c_str()); });
     server.addHandler(&events);
     server.on("/settings", HTTP_GET, [](AsyncWebServerRequest* req) {
         AsyncResponseStream* resp = req->beginResponseStream(F("application/json"));
@@ -122,7 +126,7 @@ void loop()
 
     if ((currentMillis - lastMeasurement >= MEASURE_INTERVAL)
         && lightMeter.measurementReady(true)) {
-        float lux = lightMeter.readLightLevel();
+        lux = lightMeter.readLightLevel();
         events.send(String(lux, 0).c_str());
         if (lux < threshold) {
             digitalWrite(RELAY_PIN, HIGH);
