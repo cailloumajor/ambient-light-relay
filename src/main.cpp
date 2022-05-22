@@ -84,6 +84,12 @@ void setup()
         serializeJson(settings, *resp);
         req->send(resp);
     });
+    server.on("/settings", HTTP_OPTIONS, [](AsyncWebServerRequest* req) {
+        AsyncWebServerResponse* resp = req->beginResponse(200);
+        resp->addHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp->addHeader("Access-Control-Allow-Methods", "PUT");
+        req->send(resp);
+    });
     server.onRequestBody([](AsyncWebServerRequest* req,
                             uint8_t* data,
                             size_t len,
